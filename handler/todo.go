@@ -2,6 +2,10 @@ package handler
 
 import (
 	"net/http"
+
+	"github.com/jeffbmartinez/log"
+
+	"github.com/jeffbmartinez/todo/storage"
 )
 
 // Todo handles requests to the todo endpoint.
@@ -19,9 +23,29 @@ func Todo(response http.ResponseWriter, request *http.Request) {
 }
 
 func getTodo(response http.ResponseWriter, request *http.Request) {
-	BasicResponse(http.StatusOK)
+	taskset, err := storage.GetTaskset()
+	if err != nil {
+		log.Errorf("Couldn't get taskset (%v)", err)
+		BasicResponse(http.StatusInternalServerError)
+		return
+	}
+
+	WriteJsonResponse(response, taskset, http.StatusOK)
 }
 
 func postTodo(response http.ResponseWriter, request *http.Request) {
+	taskset, err := storage.GetTaskset()
+	if err != nil {
+		log.Errorf("Couldn't get taskset (%v)", err)
+		BasicResponse(http.StatusInternalServerError)
+		return
+	}
+
+	if err := storage.SaveTaskset(taskset); err != nil {
+		log.Errorf("Couldn't save taskset (%v)", err)
+		BasicResponse(http.StatusInternalServerError)
+		return
+	}
+
 	BasicResponse(http.StatusOK)
 }

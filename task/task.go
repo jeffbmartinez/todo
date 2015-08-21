@@ -1,9 +1,14 @@
 package task
 
+import (
+	"github.com/twinj/uuid"
+)
+
 // Task represents a task or a subtask. Tasks can be stand-alone todo items
 // or they can be broken down into subtasks, which can then have their own
 // subtasks, and so on.
 type Task struct {
+	ID       string
 	Name     string
 	Complete bool
 
@@ -13,6 +18,7 @@ type Task struct {
 
 func newTask(name string, parent *Task) *Task {
 	return &Task{
+		ID:       uuid.NewV4().String(),
 		Name:     name,
 		Complete: false,
 		Parent:   parent,
@@ -124,6 +130,7 @@ func (t Task) getSerializable() serializableTask {
 // serializableTask is similar to a Task, but with the circular dependency
 // of Parent removed, to make it easier to serialize
 type serializableTask struct {
+	ID       string
 	Name     string
 	Complete bool
 	Subtasks []*serializableTask
@@ -131,6 +138,7 @@ type serializableTask struct {
 
 func (t serializableTask) getTask(parent *Task) *Task {
 	task := newTask(t.Name, parent)
+	task.ID = t.ID
 	task.Complete = t.Complete
 
 	for _, subtask := range t.Subtasks {
