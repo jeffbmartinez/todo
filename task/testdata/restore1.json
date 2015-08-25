@@ -1,36 +1,51 @@
 {
-  "Tasks": [
-    {
+  "Tasks": {
+    "92a60899-df2f-46b8-8648-f369eb4fcf6b": {
+      "ID": "92a60899-df2f-46b8-8648-f369eb4fcf6b",
       "Name": "zero",
       "Complete": false,
-      "Subtasks": []
+      "Parent": "",
+      "Subtasks": {}
     },
-    {
+    "598d22ee-dc92-40fc-b4c8-15f94bfd4d4a": {
+      "ID": "598d22ee-dc92-40fc-b4c8-15f94bfd4d4a",
       "Name": "one",
       "Complete": true,
-      "Subtasks": []
+      "Parent": "",
+      "Subtasks": {}
     },
-    {
+    "c30f4d91-6db3-4967-93fe-de76ac40a8cd": {
+      "ID": "c30f4d91-6db3-4967-93fe-de76ac40a8cd",
       "Name": "two",
       "Complete": false,
-      "Subtasks": [
-        {
-          "Name": "two-zero",
-          "Complete": true,
-          "Subtasks": []
-        },
-        {
-          "Name": "two-one",
-          "Complete": false,
-          "Subtasks": [
-	        {
-	          "Name": "two-one-zero",
-	          "Complete": false,
-	          "Subtasks": []
-	        }
-	      ]
-        }
-      ]
+      "Parent": "",
+      "Subtasks": {
+        "4f544533-fe9d-4a95-b3d3-1a42b25b1fda": true,
+        "1cdf01c0-19f9-46b7-a4dc-750ec8988305": true
+      }
+    },
+    "4f544533-fe9d-4a95-b3d3-1a42b25b1fda": {
+      "ID": "4f544533-fe9d-4a95-b3d3-1a42b25b1fda",
+      "Name": "two-zero",
+      "Complete": true,
+      "Parent": "589eab72-3127-4e83-a374-b1898feff72f",
+      "Subtasks": {}
+    },
+    "1cdf01c0-19f9-46b7-a4dc-750ec8988305": {
+      "ID": "1cdf01c0-19f9-46b7-a4dc-750ec8988305",
+      "Name": "two-one",
+      "Complete": false,
+      "Parent": "589eab72-3127-4e83-a374-b1898feff72f",
+      "Subtasks": {
+        "8f8aa78e-0cdb-44b6-831f-338f694306c4": true
+      }
+    },
+    "8f8aa78e-0cdb-44b6-831f-338f694306c4": {
+      "ID": "8f8aa78e-0cdb-44b6-831f-338f694306c4",
+      "Name": "two-one-zero",
+      "Complete": false,
+      "Parent": "1cdf01c0-19f9-46b7-a4dc-750ec8988305",
+      "Subtasks": {}
     }
-  ]
+  }
 }

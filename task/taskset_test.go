@@ -7,17 +7,29 @@ import (
 )
 
 func TestStoreTaskset1(t *testing.T) {
-	task1 := NewRootTask("one")
-	task2 := NewRootTask("two")
-	task3 := NewRootTask("three")
-	NewSubtask("three-one", task3)
+	task1, err := NewRootTask("one")
+	if err != nil {
+		t.FailNow()
+	}
+
+	task2, err := NewRootTask("two")
+	if err != nil {
+		t.FailNow()
+	}
+
+	task3, err := NewRootTask("three")
+	if err != nil {
+		t.FailNow()
+	}
+
+	NewSubtask("three-one", task3.ID)
 
 	task2.Complete = true
 
-	ts := Taskset{}
-	ts.AddTask(task1)
-	ts.AddTask(task2)
-	ts.AddTask(task3)
+	ts := NewTaskset()
+	ts.Add(task1)
+	ts.Add(task2)
+	ts.Add(task3)
 
 	const tempStorageFile = "_tempstoragefile_.json"
 
@@ -31,13 +43,13 @@ func TestStoreTaskset1(t *testing.T) {
 		t.FailNow()
 	}
 
-	if len(ts.Tasks) != 3 || ts.Tasks[0].Name != "one" {
+	if len(ts.Tasks) != 3 {
 		fmt.Printf("Restored tasks not as expected (1)\n")
 		t.FailNow()
 	}
 
-	if !ts.Tasks[1].Complete || ts.Tasks[2].Subtasks[0].Name != "three-one" {
-		fmt.Printf("Restored tasks not as expected (2)\n")
+	task, ok := ts.Get(task1.ID)
+	if !ok || task.Name != "one" {
 		t.FailNow()
 	}
 
@@ -48,27 +60,26 @@ func TestStoreTaskset1(t *testing.T) {
 }
 
 func TestRestoreTaskset1(t *testing.T) {
-	ts := Taskset{}
+	ts := NewTaskset()
 	if err := ts.Restore("testdata/restore1.json"); err != nil {
+		fmt.Println(err)
 		t.FailNow()
 	}
 
-	if len(ts.Tasks) != 3 {
+	if len(ts.Tasks) != 6 {
+		fmt.Println("here zero", len(ts.Tasks))
 		t.FailNow()
 	}
 
-	task1 := ts.Tasks[1]
-	if task1.Name != "one" || !task1.Complete || len(task1.Subtasks) != 0 {
+	task1, ok := ts.Get("598d22ee-dc92-40fc-b4c8-15f94bfd4d4a")
+	if !ok || task1.Name != "one" || !task1.Complete || len(task1.Subtasks) != 0 {
+		fmt.Println("here one")
 		t.FailNow()
 	}
 
-	task2 := ts.Tasks[2]
-	if task2.Name != "two" || task2.Complete {
-		t.FailNow()
-	}
-
-	task210 := task2.Subtasks[1].Subtasks[0]
-	if task210.Name != "two-one-zero" || task210.Complete || len(task210.Subtasks) != 0 {
+	task2, ok := ts.Get("c30f4d91-6db3-4967-93fe-de76ac40a8cd")
+	if !ok || task2.Name != "two" || task2.Complete || len(task2.Subtasks) != 2 {
+		fmt.Println("here two")
 		t.FailNow()
 	}
 }

@@ -7,7 +7,10 @@ import (
 	"github.com/jeffbmartinez/log"
 )
 
-func WriteJsonResponse(response http.ResponseWriter, message interface{}, statusCode int) {
+/*
+WriteJSONResponse writes a json response (with correct http header).
+*/
+func WriteJSONResponse(response http.ResponseWriter, message interface{}, statusCode int) {
 	responseString, err := json.Marshal(message)
 	if err != nil {
 		log.Errorf("Couldn't marshal json: %v", err)

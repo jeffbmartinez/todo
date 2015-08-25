@@ -6,25 +6,43 @@ import (
 	"os"
 )
 
+/*
+Taskset contains a map of task IDs to the tasks themselves.
+It provides a quick lookup to find a task, given a task ID.
+*/
 type Taskset struct {
-	Tasks []*Task
+	Tasks map[string]*Task
 }
 
-func (ts *Taskset) AddTask(task *Task) {
-	ts.Tasks = append(ts.Tasks, task)
-}
-
-func (ts Taskset) GetSerializable() serializableTaskset {
-	newTaskset := serializableTaskset{}
-
-	for _, task := range ts.Tasks {
-		newTask := task.getSerializable()
-		newTaskset.Tasks = append(newTaskset.Tasks, &newTask)
+/*
+NewTaskset returns an empty set of tasks.
+*/
+func NewTaskset() Taskset {
+	return Taskset{
+		Tasks: make(map[string]*Task),
 	}
-
-	return newTaskset
 }
 
+/*
+Get returns a task by it's ID, and an 'ok' parameter. If ok
+is false, no task with that ID was found.
+*/
+func (ts *Taskset) Get(ID string) (*Task, bool) {
+	task, ok := ts.Tasks[ID]
+	return task, ok
+}
+
+/*
+Add adds a task to the set of tasks.
+*/
+func (ts *Taskset) Add(task *Task) error {
+	ts.Tasks[task.ID] = task
+	return nil
+}
+
+/*
+Store serializes the contents of the taskset to the specified file.
+*/
 func (ts Taskset) Store(filename string) error {
 	file, err := os.Create(filename)
 	if err != nil {
@@ -32,41 +50,25 @@ func (ts Taskset) Store(filename string) error {
 	}
 
 	encoder := json.NewEncoder(file)
-	err = encoder.Encode(ts.GetSerializable())
+	err = encoder.Encode(ts)
 
 	return err
 }
 
+/*
+Restore restores a serialized taskset to the taskset object from
+the file specified.
+*/
 func (ts *Taskset) Restore(filename string) error {
 	contents, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return err
 	}
 
-	var taskset serializableTaskset
-	err = json.Unmarshal(contents, &taskset)
+	err = json.Unmarshal(contents, &ts)
 	if err != nil {
 		return err
 	}
 
-	ts.Tasks = make([]*Task, 0)
-	for _, task := range taskset.Tasks {
-		ts.Tasks = append(ts.Tasks, task.getTask(nil))
-	}
-
 	return nil
-}
-
-type serializableTaskset struct {
-	Tasks []*serializableTask
-}
-
-func (ts serializableTaskset) getTaskset() Taskset {
-	taskset := Taskset{}
-
-	for _, task := range ts.Tasks {
-		taskset.Tasks = append(taskset.Tasks, task.getTask(nil))
-	}
-
-	return taskset
 }

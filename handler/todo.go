@@ -30,7 +30,7 @@ func getTodo(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	WriteJsonResponse(response, taskset, http.StatusOK)
+	WriteJSONResponse(response, taskset, http.StatusOK)
 }
 
 func postTodo(response http.ResponseWriter, request *http.Request) {

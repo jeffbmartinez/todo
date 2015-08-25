@@ -12,6 +12,9 @@ var taskset task.Taskset
 
 var lock sync.Mutex
 
+/*
+GetTaskset retrieves a taskset in a threadsafe manner.
+*/
 func GetTaskset() (task.Taskset, error) {
 	lock.Lock()
 	defer lock.Unlock()
@@ -20,6 +23,9 @@ func GetTaskset() (task.Taskset, error) {
 	return taskset, err
 }
 
+/*
+SaveTaskset saves a taskset in a threadsafe manner.
+*/
 func SaveTaskset(ts task.Taskset) error {
 	lock.Lock()
 	defer lock.Unlock()
