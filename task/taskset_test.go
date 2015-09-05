@@ -7,22 +7,22 @@ import (
 )
 
 func TestStoreTaskset1(t *testing.T) {
-	task1, err := NewRootTask("one")
+	task1, err := NewTask("one", "")
 	if err != nil {
 		t.FailNow()
 	}
 
-	task2, err := NewRootTask("two")
+	task2, err := NewTask("two", "")
 	if err != nil {
 		t.FailNow()
 	}
 
-	task3, err := NewRootTask("three")
+	task3, err := NewTask("three", "")
 	if err != nil {
 		t.FailNow()
 	}
 
-	NewSubtask("three-one", task3.ID)
+	NewTask("three-one", task3.ID)
 
 	task2.Complete = true
 

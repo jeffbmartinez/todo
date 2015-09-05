@@ -11,7 +11,7 @@ import (
 )
 
 /*
-Task is the json struct that gets passed in the request to create
+TaskParams is the json struct that gets passed in the request to create
 a new Task object.
 */
 type TaskParams struct {
@@ -47,7 +47,7 @@ func postNewTask(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	newTask, err := task.NewSubtask(taskParams.Name, taskParams.ParentID)
+	newTask, err := task.NewTask(taskParams.Name, taskParams.ParentID)
 	if err != nil {
 		log.Errorf("Couldn't create new task (%v)", err)
 		WriteBasicResponse(http.StatusInternalServerError, response, request)

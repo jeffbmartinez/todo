@@ -43,24 +43,13 @@ func newTask(name string, parentID string) (*Task, error) {
 }
 
 /*
-NewRootTask creates a new root task in an incomplete state,
-with no subtasks.
-*/
-func NewRootTask(name string) (*Task, error) {
-	parentID := ""
-	return newTask(name, parentID)
-}
-
-/*
-NewSubtask creates a new subtask with the assigned parent, in an
+NewTask creates a new subtask with the assigned parent, in an
 incomplete state, with no subtasks of it's own. Passing in "" (empty
-string) as the argument for parent is equivalent to using NewRootTask.
-Using NewRootTask for this purpose is recommended for creating root tasks
-as the intention is more clear.
+string) as the argument for parent means creating a root task.
 */
-func NewSubtask(name string, parentID string) (*Task, error) {
+func NewTask(name string, parentID string) (*Task, error) {
 	if parentID == "" {
-		return NewRootTask(name)
+		return newTask(name, parentID)
 	}
 
 	parent, ok := allTasks.Get(parentID)
@@ -70,7 +59,7 @@ func NewSubtask(name string, parentID string) (*Task, error) {
 
 	subtask, err := newTask(name, parentID)
 	if err != nil {
-		return nil, UnableToCreateError{}
+		return nil, UnableToCreateTaskError{}
 	}
 
 	parent.addSubtask(subtask)

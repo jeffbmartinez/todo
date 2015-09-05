@@ -5,20 +5,24 @@ import (
 )
 
 /*
-UnableToCreateError is an error object used to signify
+UnableToCreateTaskError is an error object used to signify
 that there was a problem creating a new task.
 */
-type UnableToCreateError struct {
+type UnableToCreateTaskError struct {
 	reason string
 }
 
-func NewUnableToCreateError(reason error) UnableToCreateError {
-	return UnableToCreateError{
+/*
+NewUnableToCreateTaskError accepts a reason string for an error that
+implies
+*/
+func NewUnableToCreateTaskError(reason string) UnableToCreateTaskError {
+	return UnableToCreateTaskError{
 		reason: reason,
 	}
 }
 
-func (t UnableToCreateError) Error() string {
+func (t UnableToCreateTaskError) Error() string {
 	return fmt.Sprintf("Unable to create new task (%v)", t.reason)
 }
 

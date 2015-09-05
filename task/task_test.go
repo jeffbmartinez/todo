@@ -5,20 +5,20 @@ import (
 )
 
 func TestIsRootTask(t *testing.T) {
-	task, err := NewRootTask("root")
+	task, err := NewTask("root", "")
 	if err != nil || !task.IsRootTask() {
 		t.FailNow()
 	}
 }
 
 func TestMarkAsComplete1(t *testing.T) {
-	root, err := NewRootTask("root")
+	root, err := NewTask("root", "")
 
 	if err != nil || root.Complete {
 		t.FailNow()
 	}
 
-	child1, err := NewSubtask("child1", root.ID)
+	child1, err := NewTask("child1", root.ID)
 
 	if err != nil || root.Complete {
 		t.FailNow()
@@ -32,17 +32,17 @@ func TestMarkAsComplete1(t *testing.T) {
 }
 
 func TestMarkAsComplete2(t *testing.T) {
-	root, err := NewRootTask("root")
+	root, err := NewTask("root", "")
 	if err != nil {
 		t.FailNow()
 	}
 
-	child, err := NewSubtask("child", root.ID)
+	child, err := NewTask("child", root.ID)
 	if err != nil {
 		t.FailNow()
 	}
 
-	grandchild, err := NewSubtask("grandchild", child.ID)
+	grandchild, err := NewTask("grandchild", child.ID)
 	if err != nil {
 		t.FailNow()
 	}
@@ -59,22 +59,22 @@ func TestMarkAsComplete2(t *testing.T) {
 }
 
 func TestMarkAsComplete3(t *testing.T) {
-	root, err := NewRootTask("root")
+	root, err := NewTask("root", "")
 	if err != nil {
 		t.FailNow()
 	}
 
-	child, err := NewSubtask("child", root.ID)
+	child, err := NewTask("child", root.ID)
 	if err != nil {
 		t.FailNow()
 	}
 
-	grandchild1, err := NewSubtask("grandchild1", child.ID)
+	grandchild1, err := NewTask("grandchild1", child.ID)
 	if err != nil {
 		t.FailNow()
 	}
 
-	grandchild2, err := NewSubtask("grandchild2", child.ID)
+	grandchild2, err := NewTask("grandchild2", child.ID)
 	if err != nil {
 		t.FailNow()
 	}
