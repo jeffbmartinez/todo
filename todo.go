@@ -44,7 +44,9 @@ func getRouter() *mux.Router {
 
 	api := router.PathPrefix("/api/").Subrouter()
 
-	api.HandleFunc("/todo", handler.Todo)
+	api.HandleFunc("/tasks", handler.Tasks)
+	api.HandleFunc("/tasks/new", handler.NewTask)
+	api.HandleFunc("/tasks/{id}", handler.Task)
 
 	return router
 }

@@ -41,6 +41,13 @@ func (ts *Taskset) Add(task *Task) error {
 }
 
 /*
+Delete task from taskset
+*/
+func (ts *Taskset) Delete(task *Task) {
+	delete(ts.Tasks, task.ID)
+}
+
+/*
 Store serializes the contents of the taskset to the specified file.
 */
 func (ts Taskset) Store(filename string) error {

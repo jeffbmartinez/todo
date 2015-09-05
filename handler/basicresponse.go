@@ -12,3 +12,8 @@ func BasicResponse(code int) func(response http.ResponseWriter, request *http.Re
 		response.Write([]byte(http.StatusText(code)))
 	}
 }
+
+// WriteBasicResponse responds the the request with a BasicResponse
+func WriteBasicResponse(code int, response http.ResponseWriter, request *http.Request) {
+	BasicResponse(code)(response, request)
+}
