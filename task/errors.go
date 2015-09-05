@@ -9,11 +9,17 @@ UnableToCreateError is an error object used to signify
 that there was a problem creating a new task.
 */
 type UnableToCreateError struct {
-	errorMessage string
+	reason string
+}
+
+func NewUnableToCreateError(reason error) UnableToCreateError {
+	return UnableToCreateError{
+		reason: reason,
+	}
 }
 
 func (t UnableToCreateError) Error() string {
-	return "Unable to create new task"
+	return fmt.Sprintf("Unable to create new task (%v)", t.reason)
 }
 
 ////////////////////////////////
