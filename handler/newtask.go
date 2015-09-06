@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/jeffbmartinez/log"
 
@@ -11,12 +12,14 @@ import (
 )
 
 /*
-Task is the json struct that gets passed in the request to create
+TaskParams is the json struct that gets passed in the request to create
 a new Task object.
 */
 type TaskParams struct {
-	Name     string `json:"name"`
-	ParentID string `json:"parentID"`
+	Name       string    `json:"name"`
+	ParentIDs  []string  `json:"parentIDs"`
+	DueDate    time.Time `json:"dueDate"`
+	Categories []string  `json:"categories"`
 }
 
 // NewTask handles requests to the /tasks/new endpoint.
@@ -40,34 +43,40 @@ func postNewTask(response http.ResponseWriter, request *http.Request) {
 	defer request.Body.Close()
 	decoder := json.NewDecoder(request.Body)
 
-	var taskParams TaskParams
-	err := decoder.Decode(&taskParams)
+	var params TaskParams
+	err := decoder.Decode(&params)
 	if err != nil {
 		WriteBasicResponse(http.StatusBadRequest, response, request)
 		return
 	}
 
-	newTask, err := task.NewSubtask(taskParams.Name, taskParams.ParentID)
+	tasklist, err := storage.GetTasklist()
 	if err != nil {
-		log.Errorf("Couldn't create new task (%v)", err)
+		log.Errorf("Could not get tasklist")
 		WriteBasicResponse(http.StatusInternalServerError, response, request)
 		return
 	}
 
-	taskset, err := storage.GetTaskset()
-	if err != nil {
-		log.Errorf("Couldn't get taskset (%v)", err)
+	var parentTasks []*task.Task
+	for _, parentID := range params.ParentIDs {
+		parentTask, ok := tasklist.Registry[parentID]
+		if !ok {
+			WriteBasicResponse(http.StatusBadRequest, response, request)
+			return
+		}
+
+		parentTasks = append(parentTasks, parentTask)
+	}
+
+	newTask := tasklist.AddTask(params.Name, parentTasks)
+	newTask.DueDate = params.DueDate
+	newTask.Categories = params.Categories
+
+	if err := storage.SaveTasklist(tasklist); err != nil {
+		log.Errorf("Couldn't save tasklist (%v)", err)
 		WriteBasicResponse(http.StatusInternalServerError, response, request)
 		return
 	}
 
-	taskset.Add(newTask)
-
-	if err := storage.SaveTaskset(taskset); err != nil {
-		log.Errorf("Couldn't save taskset (%v)", err)
-		WriteBasicResponse(http.StatusInternalServerError, response, request)
-		return
-	}
-
-	WriteBasicResponse(http.StatusOK, response, request)
+	WriteJSONResponse(response, newTask, http.StatusOK)
 }

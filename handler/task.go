@@ -29,14 +29,14 @@ func getTask(response http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	taskID := vars["id"]
 
-	taskset, err := storage.GetTaskset()
+	tasklist, err := storage.GetTasklist()
 	if err != nil {
-		log.Errorf("Couldn't get taskset (%v)", err)
+		log.Errorf("Couldn't get tasklist (%v)", err)
 		WriteBasicResponse(http.StatusInternalServerError, response, request)
 		return
 	}
 
-	task, ok := taskset.Get(taskID)
+	task, ok := tasklist.Registry[taskID]
 	if !ok {
 		WriteBasicResponse(http.StatusNotFound, response, request)
 		return
@@ -49,31 +49,25 @@ func putTask(response http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	taskID := vars["id"]
 
-	taskset, err := storage.GetTaskset()
+	tasklist, err := storage.GetTasklist()
 	if err != nil {
-		log.Errorf("Couldn't get taskset (%v)", err)
+		log.Errorf("Couldn't get tasklist (%v)", err)
 		WriteBasicResponse(http.StatusInternalServerError, response, request)
 		return
 	}
 
-	task, ok := taskset.Get(taskID)
+	task, ok := tasklist.Registry[taskID]
 	if !ok {
 		WriteBasicResponse(http.StatusNotFound, response, request)
 		return
 	}
 
 	// TODO: Modify the task
+	task.Name = "modified"
 
-	err = taskset.Add(task)
+	err = storage.SaveTasklist(tasklist)
 	if err != nil {
-		log.Errorf("Couldn't add modified task to taskset (%v)", err)
-		WriteBasicResponse(http.StatusInternalServerError, response, request)
-		return
-	}
-
-	err = storage.SaveTaskset(taskset)
-	if err != nil {
-		log.Errorf("Couldn't save taskset (%v)", err)
+		log.Errorf("Couldn't save tasklist (%v)", err)
 		WriteBasicResponse(http.StatusInternalServerError, response, request)
 		return
 	}
@@ -85,24 +79,24 @@ func deleteTask(response http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	taskID := vars["id"]
 
-	taskset, err := storage.GetTaskset()
+	tasklist, err := storage.GetTasklist()
 	if err != nil {
-		log.Errorf("Couldn't get taskset (%v)", err)
+		log.Errorf("Couldn't get tasklist (%v)", err)
 		WriteBasicResponse(http.StatusInternalServerError, response, request)
 		return
 	}
 
-	task, ok := taskset.Get(taskID)
+	task, ok := tasklist.Registry[taskID]
 	if !ok {
 		WriteBasicResponse(http.StatusNotFound, response, request)
 		return
 	}
 
-	taskset.Delete(task)
+	tasklist.Delete(task)
 
-	err = storage.SaveTaskset(taskset)
+	err = storage.SaveTasklist(tasklist)
 	if err != nil {
-		log.Errorf("Couldn't save taskset (%v)", err)
+		log.Errorf("Couldn't save tasklist (%v)", err)
 		WriteBasicResponse(http.StatusInternalServerError, response, request)
 		return
 	}

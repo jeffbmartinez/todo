@@ -21,12 +21,12 @@ func Tasks(response http.ResponseWriter, request *http.Request) {
 }
 
 func getTasks(response http.ResponseWriter, request *http.Request) {
-	taskset, err := storage.GetTaskset()
+	tasklist, err := storage.GetTasklist()
 	if err != nil {
-		log.Errorf("Couldn't get taskset (%v)", err)
+		log.Errorf("Couldn't get tasklist (%v)", err)
 		WriteBasicResponse(http.StatusInternalServerError, response, request)
 		return
 	}
 
-	WriteJSONResponse(response, taskset, http.StatusOK)
+	WriteJSONResponse(response, tasklist.RootTasks, http.StatusOK)
 }

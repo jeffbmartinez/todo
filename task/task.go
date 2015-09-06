@@ -2,210 +2,155 @@ package task
 
 import (
 	"github.com/twinj/uuid"
+	"time"
 )
-
-var allTasks Taskset
-
-func init() {
-	allTasks = NewTaskset()
-}
 
 /*
 Task represents a task or a subtask. Tasks can be stand-alone todo items
 or they can be broken down into subtasks, which can then have their own
-subtasks, and so on. A Task with a ParentID of "" (empty string) is called
-a "root" task, which means it has no parent.
+subtasks, and so on. Subtasks have parents which they can be grouped into.
+Tasks can have multiple parents to cover the possibility of a single task
+accomplishing two parent tasks, for example "clean room" can be a subtask
+for "clean house" as well as "prepare for parents' visit".
+
+A task with no parents is called a "root" task.
 */
 type Task struct {
 	ID       string
 	Name     string
 	Complete bool
 
-	ParentID string
-	Subtasks map[string]bool
-}
+	CreatedDate  time.Time
+	ModifiedDate time.Time
+	DueDate      time.Time
 
-func newTask(name string, parentID string) (*Task, error) {
-	task := &Task{
-		ID:       uuid.NewV4().String(),
-		Name:     name,
-		Complete: false,
-		ParentID: parentID,
-		Subtasks: make(map[string]bool),
-	}
+	Categories []string
 
-	err := allTasks.Add(task)
-	if err != nil {
-		return nil, err
-	}
-
-	return task, nil
+	Parents  []*Task `json:"-"`
+	Subtasks []*Task
 }
 
 /*
-NewRootTask creates a new root task in an incomplete state,
-with no subtasks.
+NewTask creates a new task with the assigned parents. The new task is in an
+incomplete state, with no subtasks of it's own. Passing in nil or an empty
+array as the argument for parent means it has no parent(s) and so it
+is a root task.
 */
-func NewRootTask(name string) (*Task, error) {
-	parentID := ""
-	return newTask(name, parentID)
+func NewTask(name string, parents []*Task) *Task {
+	if parents == nil {
+		parents = make([]*Task, 0)
+	}
+
+	now := time.Now()
+
+	newTask := &Task{
+		ID:           uuid.NewV4().String(),
+		Name:         name,
+		Complete:     false,
+		CreatedDate:  now,
+		ModifiedDate: now,
+		DueDate:      time.Time{},
+		Categories:   make([]string, 0),
+		Parents:      parents,
+		Subtasks:     make([]*Task, 0),
+	}
+
+	for _, parent := range parents {
+		parent.AddSubtask(newTask)
+	}
+
+	return newTask
 }
 
 /*
-NewSubtask creates a new subtask with the assigned parent, in an
-incomplete state, with no subtasks of it's own. Passing in "" (empty
-string) as the argument for parent is equivalent to using NewRootTask.
-Using NewRootTask for this purpose is recommended for creating root tasks
-as the intention is more clear.
-*/
-func NewSubtask(name string, parentID string) (*Task, error) {
-	if parentID == "" {
-		return NewRootTask(name)
-	}
-
-	parent, ok := allTasks.Get(parentID)
-	if !ok {
-		return nil, NewNotFoundError(parentID)
-	}
-
-	subtask, err := newTask(name, parentID)
-	if err != nil {
-		return nil, UnableToCreateError{}
-	}
-
-	parent.addSubtask(subtask)
-
-	return subtask, nil
-}
-
-/*
-IsRootTask returns true if the task is a root task. In other words, it is the
-main task.
+IsRootTask returns true if the task is a root task. A root task is one
+that has no parents.
 */
 func (t Task) IsRootTask() bool {
-	return t.ParentID == ""
+	return len(t.Parents) == 0
 }
 
 /*
-ParentTask retrieves the Task object associated with the ParentID, or
-nil if the task has no parent.
-*/
-func (t Task) ParentTask() (*Task, error) {
-	if t.IsRootTask() {
-		return nil, nil
-	}
-
-	task, ok := allTasks.Get(t.ParentID)
-	if !ok {
-		return nil, NewNotFoundError(t.ParentID)
-	}
-
-	return task, nil
-}
-
-/*
-MarkAsComplete marks a task and all of it's subtasks as complete or finished.
+MarkAsComplete marks a task and all of it's subtasks as complete.
 It the task itself is a subtask of a parent task and the task was
-previously the only remaining task to be completed, the parent will
+previously the only remaining task to be completed, the parent will be
 marked as complete as well. This works all the way up the chain.
 If this method is called on a task already marked as complete, nothing
 happens.
 */
-func (t *Task) MarkAsComplete() error {
+func (t *Task) MarkAsComplete() {
 	if t.Complete {
-		return nil
+		return
 	}
 
 	t.Complete = true
 
-	if t.IsRootTask() {
-		return nil
+	for _, subtask := range t.Subtasks {
+		subtask.MarkAsComplete()
 	}
 
-	for subtaskID := range t.Subtasks {
-		subtask, ok := allTasks.Get(subtaskID)
-		if !ok {
-			return NewNotFoundError(subtaskID)
-		}
-
-		if err := subtask.MarkAsComplete(); err != nil {
-			return err
+	for _, parent := range t.Parents {
+		if parent.allSubtasksAreComplete() {
+			parent.MarkAsComplete()
 		}
 	}
-
-	parentTask, err := t.ParentTask()
-	if err != nil {
-		return err
-	}
-
-	subtasksAreComplete, err := parentTask.allSubtasksAreComplete()
-	if err != nil {
-		return err
-	}
-
-	if subtasksAreComplete {
-		if err := parentTask.MarkAsComplete(); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 /*
-MarkAsIncomplete marks a task, as well as all parents up the chain, as
-incomplete. If the task is not marked as complete, nothing happens.
+MarkAsIncomplete marks a task, as well as all parents up it's chain, as
+incomplete. If the task is already incomplete, nothing happens.
 */
-func (t *Task) MarkAsIncomplete() error {
+func (t *Task) MarkAsIncomplete() {
 	if !t.Complete {
-		return nil
+		return
 	}
 
 	t.Complete = false
 
-	parent, err := t.ParentTask()
-	if err != nil {
-		return err
+	for _, parent := range t.Parents {
+		parent.MarkAsIncomplete()
 	}
-
-	if err := parent.MarkAsIncomplete(); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 /*
-addSubtask adds a subtask to a task. If the subtask is incomplete,
+AddSubtask adds a subtask to a task. If the subtask is incomplete,
 the task will be marked as incomplete as well.
 */
-func (t *Task) addSubtask(subtask *Task) error {
+func (t *Task) AddSubtask(subtask *Task) {
 	if t.Complete && !subtask.Complete {
-		if err := t.MarkAsIncomplete(); err != nil {
-			return err
-		}
+		t.MarkAsIncomplete()
 	}
 
-	t.Subtasks[subtask.ID] = true
+	t.Subtasks = append(t.Subtasks, subtask)
+}
 
-	return nil
+/*
+Delete removes the current Node and all subtasks from the Task structure.
+Similar to MarkAsComplete() any parent tasks are then marked as complete
+if they have no remaining incomplete subtasks.
+*/
+func (t *Task) Delete() {
+	t.MarkAsComplete()
+
+	for _, subtask := range t.Subtasks {
+		subtask.Delete()
+	}
+
+	for _, parent := range t.Parents {
+		parent.Subtasks = deleteFromSliceByID(parent.Subtasks, t.ID)
+	}
 }
 
 /*
 allSubtasksAreComplete returns true if all subtasks of the task have been
 marked as complete. Also returns true if there are no subtasks.
 */
-func (t Task) allSubtasksAreComplete() (bool, error) {
-	for subtaskID := range t.Subtasks {
-		subtask, ok := allTasks.Get(subtaskID)
-		if !ok {
-			return false, NewNotFoundError(subtaskID)
-		}
-
+func (t Task) allSubtasksAreComplete() bool {
+	for _, subtask := range t.Subtasks {
 		if !subtask.Complete {
-			return false, nil
+			return false
 		}
 	}
 
-	return true, nil
+	return true
 }
