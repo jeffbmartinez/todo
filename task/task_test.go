@@ -5,47 +5,36 @@ import (
 )
 
 func TestIsRootTask(t *testing.T) {
-	task, err := NewTask("root", "")
-	if err != nil || !task.IsRootTask() {
+	task := NewTask("root", nil)
+	if !task.IsRootTask() {
 		t.FailNow()
 	}
 }
 
 func TestMarkAsComplete1(t *testing.T) {
-	root, err := NewTask("root", "")
+	root := NewTask("root", nil)
 
-	if err != nil || root.Complete {
+	if root.Complete {
 		t.FailNow()
 	}
 
-	child1, err := NewTask("child1", root.ID)
+	child1 := NewTask("child1", []*Task{root})
 
-	if err != nil || root.Complete {
+	if root.Complete {
 		t.FailNow()
 	}
 
-	err = child1.MarkAsComplete()
+	child1.MarkAsComplete()
 
-	if err != nil || !root.Complete {
+	if !root.Complete {
 		t.FailNow()
 	}
 }
 
 func TestMarkAsComplete2(t *testing.T) {
-	root, err := NewTask("root", "")
-	if err != nil {
-		t.FailNow()
-	}
-
-	child, err := NewTask("child", root.ID)
-	if err != nil {
-		t.FailNow()
-	}
-
-	grandchild, err := NewTask("grandchild", child.ID)
-	if err != nil {
-		t.FailNow()
-	}
+	root := NewTask("root", nil)
+	child := NewTask("child", []*Task{root})
+	grandchild := NewTask("grandchild", []*Task{child})
 
 	if root.Complete || child.Complete || grandchild.Complete {
 		t.FailNow()
@@ -59,39 +48,24 @@ func TestMarkAsComplete2(t *testing.T) {
 }
 
 func TestMarkAsComplete3(t *testing.T) {
-	root, err := NewTask("root", "")
-	if err != nil {
-		t.FailNow()
-	}
-
-	child, err := NewTask("child", root.ID)
-	if err != nil {
-		t.FailNow()
-	}
-
-	grandchild1, err := NewTask("grandchild1", child.ID)
-	if err != nil {
-		t.FailNow()
-	}
-
-	grandchild2, err := NewTask("grandchild2", child.ID)
-	if err != nil {
-		t.FailNow()
-	}
+	root := NewTask("root", nil)
+	child := NewTask("child", []*Task{root})
+	grandchild1 := NewTask("grandchild1", []*Task{child})
+	grandchild2 := NewTask("grandchild2", []*Task{child})
 
 	if root.Complete {
-		t.FailNow()
+		t.Fatal("Root task should not be complete by default")
 	}
 
-	err = grandchild1.MarkAsComplete()
+	grandchild1.MarkAsComplete()
 
-	if err != nil || root.Complete {
-		t.FailNow()
+	if root.Complete {
+		t.Fatal("Root task should not be complete, it has an incomplete subtask")
 	}
 
-	err = grandchild2.MarkAsComplete()
+	grandchild2.MarkAsComplete()
 
-	if err != nil || !root.Complete {
-		t.FailNow()
+	if !root.Complete {
+		t.Fatal("Root task should be complete, all subtasks are complete")
 	}
 }

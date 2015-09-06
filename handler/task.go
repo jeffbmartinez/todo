@@ -64,12 +64,7 @@ func putTask(response http.ResponseWriter, request *http.Request) {
 
 	// TODO: Modify the task
 
-	err = taskset.Add(task)
-	if err != nil {
-		log.Errorf("Couldn't add modified task to taskset (%v)", err)
-		WriteBasicResponse(http.StatusInternalServerError, response, request)
-		return
-	}
+	taskset.Put(task)
 
 	err = storage.SaveTaskset(taskset)
 	if err != nil {

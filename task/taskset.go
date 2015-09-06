@@ -33,11 +33,10 @@ func (ts *Taskset) Get(ID string) (*Task, bool) {
 }
 
 /*
-Add adds a task to the set of tasks.
+Put adds a new task or replaces an existing task in the set of tasks.
 */
-func (ts *Taskset) Add(task *Task) error {
+func (ts *Taskset) Put(task *Task) {
 	ts.Tasks[task.ID] = task
-	return nil
 }
 
 /*
