@@ -58,7 +58,6 @@ func (ts *Tasklist) Delete(task *Task) {
 	delete(ts.Registry, task.ID)
 
 	if task.IsRootTask() {
-		// delete(ts.RootTasks, task.ID)
 		ts.RootTasks = deleteFromSliceByID(ts.RootTasks, task.ID)
 	}
 
