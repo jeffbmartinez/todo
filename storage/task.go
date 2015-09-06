@@ -1,9 +1,5 @@
 package storage
 
-import (
-	"time"
-)
-
 /*
 Task is an easier to serialize version of task.Task.
 */
@@ -12,9 +8,9 @@ type Task struct {
 	Name     string
 	Complete bool
 
-	CreatedDate  time.Time
-	ModifiedDate time.Time
-	DueDate      time.Time
+	CreatedDate  int64
+	ModifiedDate int64
+	DueDate      int64
 
 	Categories []string
 

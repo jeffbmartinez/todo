@@ -16,18 +16,18 @@ for "clean house" as well as "prepare for parents' visit".
 A task with no parents is called a "root" task.
 */
 type Task struct {
-	ID       string
-	Name     string
-	Complete bool
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Complete bool   `json:complete`
 
-	CreatedDate  time.Time
-	ModifiedDate time.Time
-	DueDate      time.Time
+	CreatedDate  int64 `json:"createdDate"`
+	ModifiedDate int64 `json:"modifiedDate"`
+	DueDate      int64 `json:"dueDate"`
 
-	Categories []string
+	Categories []string `json:"categories"`
 
 	Parents  []*Task `json:"-"`
-	Subtasks []*Task
+	Subtasks []*Task `json:"subtasks"`
 }
 
 /*
@@ -41,7 +41,7 @@ func NewTask(name string, parents []*Task) *Task {
 		parents = make([]*Task, 0)
 	}
 
-	now := time.Now()
+	now := time.Now().Unix()
 
 	newTask := &Task{
 		ID:           uuid.NewV4().String(),
@@ -49,7 +49,7 @@ func NewTask(name string, parents []*Task) *Task {
 		Complete:     false,
 		CreatedDate:  now,
 		ModifiedDate: now,
-		DueDate:      time.Time{},
+		DueDate:      0,
 		Categories:   make([]string, 0),
 		Parents:      parents,
 		Subtasks:     make([]*Task, 0),
@@ -113,15 +113,51 @@ func (t *Task) MarkAsIncomplete() {
 }
 
 /*
+SetComplete is a convenience method/shortcut for marking a task as complete
+or incomplete. It simply delegates the work to either MarkAsComplete()
+or MarkAsIncomplete() as appropriate.
+*/
+func (t *Task) SetComplete(complete bool) {
+	if complete {
+		t.MarkAsComplete()
+	} else {
+		t.MarkAsIncomplete()
+	}
+}
+
+/*
 AddSubtask adds a subtask to a task. If the subtask is incomplete,
-the task will be marked as incomplete as well.
+the task will be marked as incomplete as well. If the provided task
+is already a listed subtask, nothing happens.
 */
 func (t *Task) AddSubtask(subtask *Task) {
+	if findTaskInSlice(t.Subtasks, subtask.ID) != -1 {
+		return
+	}
+
 	if t.Complete && !subtask.Complete {
 		t.MarkAsIncomplete()
 	}
 
 	t.Subtasks = append(t.Subtasks, subtask)
+}
+
+/*
+AddParent adds a parent to a task. If the task is incomplete, it marks
+the new parent as incomplete as well. If the parent is already included
+in the list of parents, nothing happens.
+*/
+func (t *Task) AddParent(parent *Task) {
+	if findTaskInSlice(t.Parents, parent.ID) != -1 {
+		return
+	}
+
+	if !t.Complete && parent.Complete {
+		parent.MarkAsIncomplete()
+	}
+
+	t.Parents = append(t.Parents, parent)
+	parent.AddSubtask(t)
 }
 
 /*

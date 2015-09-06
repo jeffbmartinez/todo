@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/jeffbmartinez/log"
 
@@ -12,14 +11,14 @@ import (
 )
 
 /*
-TaskParams is the json struct that gets passed in the request to create
+NewTaskParams is the json struct that gets passed in the request to create
 a new Task object.
 */
-type TaskParams struct {
-	Name       string    `json:"name"`
-	ParentIDs  []string  `json:"parentIDs"`
-	DueDate    time.Time `json:"dueDate"`
-	Categories []string  `json:"categories"`
+type NewTaskParams struct {
+	Name       string   `json:"name"`
+	ParentIDs  []string `json:"parentIDs"`
+	DueDate    int64    `json:"dueDate"`
+	Categories []string `json:"categories"`
 }
 
 // NewTask handles requests to the /tasks/new endpoint.
@@ -36,6 +35,7 @@ func NewTask(response http.ResponseWriter, request *http.Request) {
 
 func postNewTask(response http.ResponseWriter, request *http.Request) {
 	if request.Body == nil {
+		log.Warn("Empty body in new task POST request")
 		WriteBasicResponse(http.StatusBadRequest, response, request)
 		return
 	}
@@ -43,9 +43,10 @@ func postNewTask(response http.ResponseWriter, request *http.Request) {
 	defer request.Body.Close()
 	decoder := json.NewDecoder(request.Body)
 
-	var params TaskParams
+	var params NewTaskParams
 	err := decoder.Decode(&params)
 	if err != nil {
+		log.Warn("Couldn't decode params")
 		WriteBasicResponse(http.StatusBadRequest, response, request)
 		return
 	}
@@ -61,6 +62,7 @@ func postNewTask(response http.ResponseWriter, request *http.Request) {
 	for _, parentID := range params.ParentIDs {
 		parentTask, ok := tasklist.Registry[parentID]
 		if !ok {
+			log.Warnf("Couldn't find parent task (%v)", parentID)
 			WriteBasicResponse(http.StatusBadRequest, response, request)
 			return
 		}
