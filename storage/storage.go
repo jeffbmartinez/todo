@@ -8,25 +8,28 @@ import (
 
 const storageFilename = ".todo.storage"
 
-var taskset task.Taskset
-
 var lock sync.Mutex
+var tasklist task.Tasklist
 
-/*
-GetTaskset retrieves a taskset in a threadsafe manner.
-*/
-func GetTaskset() (task.Taskset, error) {
-	lock.Lock()
-	defer lock.Unlock()
-
-	err := taskset.Restore(storageFilename)
-	return taskset, err
+func init() {
+	tasklist = task.NewTasklist()
 }
 
 /*
-SaveTaskset saves a taskset in a threadsafe manner.
+GetTasklist retrieves a tasklist in a threadsafe manner.
 */
-func SaveTaskset(ts task.Taskset) error {
+func GetTasklist() (task.Tasklist, error) {
+	lock.Lock()
+	defer lock.Unlock()
+
+	err := tasklist.Restore(storageFilename)
+	return tasklist, err
+}
+
+/*
+SaveTasklist saves a tasklist in a threadsafe manner.
+*/
+func SaveTasklist(ts task.Tasklist) error {
 	lock.Lock()
 	defer lock.Unlock()
 

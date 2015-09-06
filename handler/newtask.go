@@ -50,9 +50,16 @@ func postNewTask(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	tasklist, err := storage.GetTasklist()
+	if err != nil {
+		log.Errorf("Could not get tasklist")
+		WriteBasicResponse(http.StatusInternalServerError, response, request)
+		return
+	}
+
 	var parentTasks []*task.Task
 	for _, parentID := range params.ParentIDs {
-		parentTask, ok := task.Registry[parentID]
+		parentTask, ok := tasklist.Registry[parentID]
 		if !ok {
 			WriteBasicResponse(http.StatusBadRequest, response, request)
 			return
@@ -61,24 +68,15 @@ func postNewTask(response http.ResponseWriter, request *http.Request) {
 		parentTasks = append(parentTasks, parentTask)
 	}
 
-	newTask := task.NewTask(params.Name, parentTasks)
+	newTask := tasklist.AddTask(params.Name, parentTasks)
 	newTask.DueDate = params.DueDate
 	newTask.Categories = params.Categories
 
-	taskset, err := storage.GetTaskset()
-	if err != nil {
-		log.Errorf("Couldn't get taskset (%v)", err)
+	if err := storage.SaveTasklist(tasklist); err != nil {
+		log.Errorf("Couldn't save tasklist (%v)", err)
 		WriteBasicResponse(http.StatusInternalServerError, response, request)
 		return
 	}
 
-	taskset.Put(newTask)
-
-	if err := storage.SaveTaskset(taskset); err != nil {
-		log.Errorf("Couldn't save taskset (%v)", err)
-		WriteBasicResponse(http.StatusInternalServerError, response, request)
-		return
-	}
-
-	WriteBasicResponse(http.StatusOK, response, request)
+	WriteJSONResponse(response, newTask, http.StatusOK)
 }

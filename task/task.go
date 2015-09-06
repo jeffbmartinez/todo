@@ -1,23 +1,9 @@
 package task
 
 import (
-	"time"
-
 	"github.com/twinj/uuid"
+	"time"
 )
-
-/*
-Registry allows a quick lookup of any task by ID.
-
-Tasks have references to their parents and subtasks, but looking up a
-task by ID without this registry would require a potentially expensive
-traversal of the tasks.
-*/
-var Registry map[string]*Task
-
-func init() {
-	Registry = make(map[string]*Task)
-}
 
 /*
 Task represents a task or a subtask. Tasks can be stand-alone todo items
@@ -40,7 +26,7 @@ type Task struct {
 
 	Categories []string
 
-	Parents  []*Task
+	Parents  []*Task `json:"-"`
 	Subtasks []*Task
 }
 
@@ -72,8 +58,6 @@ func NewTask(name string, parents []*Task) *Task {
 	for _, parent := range parents {
 		parent.AddSubtask(newTask)
 	}
-
-	Registry[newTask.ID] = newTask
 
 	return newTask
 }
@@ -138,6 +122,23 @@ func (t *Task) AddSubtask(subtask *Task) {
 	}
 
 	t.Subtasks = append(t.Subtasks, subtask)
+}
+
+/*
+Delete removes the current Node and all subtasks from the Task structure.
+Similar to MarkAsComplete() any parent tasks are then marked as complete
+if they have no remaining incomplete subtasks.
+*/
+func (t *Task) Delete() {
+	t.MarkAsComplete()
+
+	for _, subtask := range t.Subtasks {
+		subtask.Delete()
+	}
+
+	for _, parent := range t.Parents {
+		parent.Subtasks = deleteFromSliceByID(parent.Subtasks, t.ID)
+	}
 }
 
 /*
