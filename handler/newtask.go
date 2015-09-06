@@ -50,7 +50,7 @@ func postNewTask(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	parentTasks := make([]*task.Task, 0)
+	var parentTasks []*task.Task
 	for _, parentID := range params.ParentIDs {
 		parentTask, ok := task.Registry[parentID]
 		if !ok {

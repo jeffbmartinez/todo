@@ -4,6 +4,9 @@ import (
 	"time"
 )
 
+/*
+Task is an easier to serialize version of task.Task.
+*/
 type Task struct {
 	ID       string
 	Name     string
