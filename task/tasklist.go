@@ -31,7 +31,8 @@ NewTasklist returns an empty set of tasks.
 */
 func NewTasklist() Tasklist {
 	return Tasklist{
-		Registry: make(map[string]*Task),
+		Registry:  make(map[string]*Task),
+		RootTasks: make([]*Task, 0),
 	}
 }
 
