@@ -29,8 +29,7 @@ func WriteJSONResponse(response http.ResponseWriter, message interface{}, status
 	if err != nil {
 		log.Errorf("Couldn't marshal json: %v", err)
 
-		response.WriteHeader(http.StatusInternalServerError)
-		response.Write([]byte(""))
+		WriteBasicResponse(http.StatusInternalServerError, response)
 		return
 	}
 
