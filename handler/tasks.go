@@ -5,7 +5,7 @@ import (
 
 	"github.com/jeffbmartinez/log"
 
-	"github.com/jeffbmartinez/todo/storage"
+	"github.com/jeffbmartinez/todo-persistence/storage"
 )
 
 // Tasks handles requests to the /tasks endpoint.

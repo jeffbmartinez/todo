@@ -6,7 +6,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/jeffbmartinez/todo/task"
+	"github.com/jeffbmartinez/todo-persistence/task"
 )
 
 const storageFilename = ".todo.storage"

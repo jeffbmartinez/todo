@@ -11,10 +11,10 @@ import (
 	"github.com/jeffbmartinez/delay"
 	"github.com/jeffbmartinez/stdoutlog"
 
-	"github.com/jeffbmartinez/todo/handler"
+	"github.com/jeffbmartinez/todo-persistence/handler"
 )
 
-const projectName string = "todo"
+const projectName string = "todo-persistence"
 const defaultListenPort = 8000
 
 func main() {

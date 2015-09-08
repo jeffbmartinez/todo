@@ -6,8 +6,8 @@ import (
 
 	"github.com/jeffbmartinez/log"
 
-	"github.com/jeffbmartinez/todo/storage"
-	"github.com/jeffbmartinez/todo/task"
+	"github.com/jeffbmartinez/todo-persistence/storage"
+	"github.com/jeffbmartinez/todo-persistence/task"
 )
 
 /*

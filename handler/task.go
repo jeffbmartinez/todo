@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jeffbmartinez/log"
 
-	"github.com/jeffbmartinez/todo/storage"
+	"github.com/jeffbmartinez/todo-persistence/storage"
 )
 
 /*
