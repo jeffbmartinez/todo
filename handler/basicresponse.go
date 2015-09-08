@@ -14,6 +14,6 @@ func BasicResponse(code int) func(response http.ResponseWriter, request *http.Re
 }
 
 // WriteBasicResponse responds the the request with a BasicResponse
-func WriteBasicResponse(code int, response http.ResponseWriter, request *http.Request) {
-	BasicResponse(code)(response, request)
+func WriteBasicResponse(code int, response http.ResponseWriter) {
+	BasicResponse(code)(response, nil)
 }
