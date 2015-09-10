@@ -36,7 +36,7 @@ func NewTask(response http.ResponseWriter, request *http.Request) {
 func postNewTask(response http.ResponseWriter, request *http.Request) {
 	if request.Body == nil {
 		log.Warn("Empty body in new task POST request")
-		WriteBasicResponse(http.StatusBadRequest, response, request)
+		WriteBasicResponse(http.StatusBadRequest, response)
 		return
 	}
 
@@ -47,14 +47,14 @@ func postNewTask(response http.ResponseWriter, request *http.Request) {
 	err := decoder.Decode(&params)
 	if err != nil {
 		log.Warn("Couldn't decode params")
-		WriteBasicResponse(http.StatusBadRequest, response, request)
+		WriteBasicResponse(http.StatusBadRequest, response)
 		return
 	}
 
 	tasklist, err := storage.GetTasklist()
 	if err != nil {
 		log.Errorf("Could not get tasklist")
-		WriteBasicResponse(http.StatusInternalServerError, response, request)
+		WriteBasicResponse(http.StatusInternalServerError, response)
 		return
 	}
 
@@ -63,7 +63,7 @@ func postNewTask(response http.ResponseWriter, request *http.Request) {
 		parentTask, ok := tasklist.Registry[parentID]
 		if !ok {
 			log.Warnf("Couldn't find parent task (%v)", parentID)
-			WriteBasicResponse(http.StatusBadRequest, response, request)
+			WriteBasicResponse(http.StatusBadRequest, response)
 			return
 		}
 
@@ -76,7 +76,7 @@ func postNewTask(response http.ResponseWriter, request *http.Request) {
 
 	if err := storage.SaveTasklist(tasklist); err != nil {
 		log.Errorf("Couldn't save tasklist (%v)", err)
-		WriteBasicResponse(http.StatusInternalServerError, response, request)
+		WriteBasicResponse(http.StatusInternalServerError, response)
 		return
 	}
 

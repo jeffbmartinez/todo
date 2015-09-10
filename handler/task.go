@@ -46,13 +46,13 @@ func getTask(response http.ResponseWriter, request *http.Request) {
 	tasklist, err := storage.GetTasklist()
 	if err != nil {
 		log.Errorf("Couldn't get tasklist (%v)", err)
-		WriteBasicResponse(http.StatusInternalServerError, response, request)
+		WriteBasicResponse(http.StatusInternalServerError, response)
 		return
 	}
 
 	task, ok := tasklist.Registry[taskID]
 	if !ok {
-		WriteBasicResponse(http.StatusNotFound, response, request)
+		WriteBasicResponse(http.StatusNotFound, response)
 		return
 	}
 
@@ -61,7 +61,7 @@ func getTask(response http.ResponseWriter, request *http.Request) {
 
 func putTask(response http.ResponseWriter, request *http.Request) {
 	if request.Body == nil {
-		WriteBasicResponse(http.StatusBadRequest, response, request)
+		WriteBasicResponse(http.StatusBadRequest, response)
 		return
 	}
 
@@ -71,7 +71,7 @@ func putTask(response http.ResponseWriter, request *http.Request) {
 	var params UpdateTaskParams
 	err := decoder.Decode(&params)
 	if err != nil {
-		WriteBasicResponse(http.StatusBadRequest, response, request)
+		WriteBasicResponse(http.StatusBadRequest, response)
 		return
 	}
 
@@ -81,13 +81,13 @@ func putTask(response http.ResponseWriter, request *http.Request) {
 	tasklist, err := storage.GetTasklist()
 	if err != nil {
 		log.Errorf("Couldn't get tasklist (%v)", err)
-		WriteBasicResponse(http.StatusInternalServerError, response, request)
+		WriteBasicResponse(http.StatusInternalServerError, response)
 		return
 	}
 
 	task, ok := tasklist.Registry[taskID]
 	if !ok {
-		WriteBasicResponse(http.StatusNotFound, response, request)
+		WriteBasicResponse(http.StatusNotFound, response)
 		return
 	}
 
@@ -109,7 +109,7 @@ func putTask(response http.ResponseWriter, request *http.Request) {
 		subtask, ok := tasklist.Registry[subtaskID]
 		if !ok {
 			log.Warnf("Could not find subtask (%v)", subtaskID)
-			WriteBasicResponse(http.StatusBadRequest, response, request)
+			WriteBasicResponse(http.StatusBadRequest, response)
 			return
 		}
 
@@ -120,7 +120,7 @@ func putTask(response http.ResponseWriter, request *http.Request) {
 		parent, ok := tasklist.Registry[parentID]
 		if !ok {
 			log.Warnf("Could not find parent task (%v)", parentID)
-			WriteBasicResponse(http.StatusBadRequest, response, request)
+			WriteBasicResponse(http.StatusBadRequest, response)
 			return
 		}
 
@@ -131,11 +131,11 @@ func putTask(response http.ResponseWriter, request *http.Request) {
 
 	if err != nil {
 		log.Errorf("Couldn't save tasklist (%v)", err)
-		WriteBasicResponse(http.StatusInternalServerError, response, request)
+		WriteBasicResponse(http.StatusInternalServerError, response)
 		return
 	}
 
-	WriteBasicResponse(http.StatusOK, response, request)
+	WriteBasicResponse(http.StatusOK, response)
 }
 
 func deleteTask(response http.ResponseWriter, request *http.Request) {
@@ -145,13 +145,13 @@ func deleteTask(response http.ResponseWriter, request *http.Request) {
 	tasklist, err := storage.GetTasklist()
 	if err != nil {
 		log.Errorf("Couldn't get tasklist (%v)", err)
-		WriteBasicResponse(http.StatusInternalServerError, response, request)
+		WriteBasicResponse(http.StatusInternalServerError, response)
 		return
 	}
 
 	task, ok := tasklist.Registry[taskID]
 	if !ok {
-		WriteBasicResponse(http.StatusNotFound, response, request)
+		WriteBasicResponse(http.StatusNotFound, response)
 		return
 	}
 
@@ -160,9 +160,9 @@ func deleteTask(response http.ResponseWriter, request *http.Request) {
 	err = storage.SaveTasklist(tasklist)
 	if err != nil {
 		log.Errorf("Couldn't save tasklist (%v)", err)
-		WriteBasicResponse(http.StatusInternalServerError, response, request)
+		WriteBasicResponse(http.StatusInternalServerError, response)
 		return
 	}
 
-	WriteBasicResponse(http.StatusOK, response, request)
+	WriteBasicResponse(http.StatusOK, response)
 }

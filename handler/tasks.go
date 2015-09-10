@@ -24,7 +24,7 @@ func getTasks(response http.ResponseWriter, request *http.Request) {
 	tasklist, err := storage.GetTasklist()
 	if err != nil {
 		log.Errorf("Couldn't get tasklist (%v)", err)
-		WriteBasicResponse(http.StatusInternalServerError, response, request)
+		WriteBasicResponse(http.StatusInternalServerError, response)
 		return
 	}
 
