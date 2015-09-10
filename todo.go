@@ -15,7 +15,7 @@ import (
 )
 
 const projectName string = "todo-persistence"
-const defaultListenPort = 8000
+const defaultListenPort = 8010
 
 func main() {
 	cleanexit.SetUpSimpleExitOnCtrlC()
