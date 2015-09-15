@@ -23,7 +23,7 @@ type UpdateTaskParams struct {
 	Categories []string `json:"categories"`
 }
 
-// Task handles requests to the /task/{id} endpoint.
+// Task handles requests to the /tasks/{id} endpoint.
 func Task(response http.ResponseWriter, request *http.Request) {
 	handler := BasicResponse(http.StatusMethodNotAllowed)
 
